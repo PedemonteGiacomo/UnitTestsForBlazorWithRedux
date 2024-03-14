@@ -137,3 +137,4 @@ C:\Users\giacomo.pedemonte\Source\Repos\PedemonteGiacomo\UnitTestsForBlazorWithR
 C:\Users\giacomo.pedemonte\Source\Repos\PedemonteGiacomo\UnitTestsForBlazorWithRedux\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
 C:\Users\giacomo.pedemonte\Source\Repos\PedemonteGiacomo\UnitTestsForBlazorWithRedux\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\giacomo.pedemonte\Source\Repos\PedemonteGiacomo\UnitTestsForBlazorWithRedux\bin\Debug\net8.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+C:\Users\giacomo.pedemonte\Source\Repos\PedemonteGiacomo\UnitTestsForBlazorWithRedux\obj\Debug\net8.0\UnitTestsForBlazorWithRedux.sourcelink.json
