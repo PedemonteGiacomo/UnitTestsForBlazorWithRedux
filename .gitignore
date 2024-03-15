@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# added by Giacomo Pedemonte (author)
+git_images/
+git_images/*

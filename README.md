@@ -10,11 +10,19 @@
 
 While right clicking on the test project we can click “Show in Test Explorer” to see, run and understand tests i a better way
 
+![showExplorer](git_images/showExplorer.png)
+
 So, we should see this window opens where all the tests are displayed, since we have already created the project is simple to understand that we have only one automatically generated test which is calle `UnitTest1`.
+
+![Explorer](git_images/Explorer.png)
 
 Then if we click “Run”, the test will be executed and we will see the result in the Test Explorer window.
 
+![RunSketch](git_images/RunTheExplorerSketch.png)
+
 So, now you can modify this test to tailor what you need to check by using `Assertion` mechanism as reported in the documentation:
+
+![XUnitTestInPractice](git_images/XUnitTestInPractice.png)
 
 ## Facts vs Theories
 
@@ -346,9 +354,16 @@ This approach is more efficient because it avoids the overhead of the loop and t
 
 Each method call directly modifies the state without needing to check the type of action.
 
-## Counter Conclusion
-
 Since those above were the starting point for all the tests I will use from this moment the `CounterFeatureExtension` way to perform tests.
+
+### What we want to reach out?
+
+We want to test the state of the application after a certain number of actions are performed, so we want to check if the state is correctly updated after the action is performed.
+Both for the `Counter` and the `Weather` feature.
+This to understand if the logic of the application works fine (if `Reducers` perform well).
+At the end we should have a situation like this:
+
+![TestExplorer](git_images/TestExplorer.png)]
 
 ---
 
