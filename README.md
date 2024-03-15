@@ -8,7 +8,7 @@
 
 ## Test Explorer
 
-While right clicking on the test project we can click “Show in Test Explorer” to see, run and understand tests i a better way
+While right clicking on the test project we can click “Show in Test Explorer”:
 
 ![showExplorer](git_images/showExplorer.png)
 
