@@ -80,7 +80,7 @@ namespace UnitTestsForBlazorWithRedux.utils.WeatherUtils
             if (forecasts_var != null)
             {
                 var randomForecasts = GetRandomForecasts(forecasts_var); // Get a randomly set of forecasts
-                forecasts = randomForecasts; // Assuming Present.Forecasts is where you store the forecasts
+                forecasts = randomForecasts;
             }
         }
 
@@ -91,7 +91,7 @@ namespace UnitTestsForBlazorWithRedux.utils.WeatherUtils
             Task.Run(async () =>
             {
                 await LoadForecasts(state);
-                state.WithWeather(new WeatherSetForecastsAction(forecasts));
+                state = state.WithWeather(new WeatherSetForecastsAction(forecasts));
             }).Wait();
 
             return state;
