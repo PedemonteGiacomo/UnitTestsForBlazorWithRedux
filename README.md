@@ -346,6 +346,218 @@ This approach is more efficient because it avoids the overhead of the loop and t
 
 Each method call directly modifies the state without needing to check the type of action.
 
-# Conclusion
+## Counter Conclusion
 
 Since those above were the starting point for all the tests I will use from this moment the `CounterFeatureExtension` way to perform tests.
+
+---
+
+# Weather Tests
+
+## Implementation
+
+Using FluentAssertion to check that the **state** *should be* like some other state.
+
+Example on the **WeatherForecast** initialization:
+
+```csharp
+[Fact]
+public void TestWeatherBeforeInitialization()
+{
+
+    var state = _fixture.state;
+
+    state.Should().BeEquivalentTo(
+       new UndoableWeatherState
+       {
+           Present = new WeatherState()
+           {
+               Initialized = false,
+               Loading = false,
+               Forecasts = Array.Empty<WeatherForecast>()
+           }
+       });
+}
+```
+
+Using always the fixture as seen before to simplify and make the code reusable for the initialization of the state.
+
+To obtain a simple method to call directly from the state, as seen above, I just used *extension methods:*
+
+```csharp
+public static UndoableWeatherState WithWeather(this UndoableWeatherState state, object action)
+{
+    switch (action) // This is the action that we are going to use to test the state
+    {
+        // Depending on the action type, we are going to call the respective reducer
+        case WeatherSetForecastsAction setForecastsAction:
+            return WeatherReducers.OnSetForecasts(state, setForecastsAction); // to reproduce the load effect we will call this reducer after the retrieving of the forecats is done
+        case WeatherSetLoadingAction setLoadingAction:
+            return WeatherReducers.OnSetLoading(state, setLoadingAction);
+        case WeatherSetInitializedAction setInitializedAction:
+            return WeatherReducers.OnSetInitialized(state);
+        case WeatherLoadForecastsAction loadForecastsAction:
+            return WithNewForecasts(state);
+        case UndoAction<UndoableWeatherState> undoAction:
+            return WeatherReducers.ReduceUndoAction(state, undoAction);
+        case RedoAction<UndoableWeatherState> redoAction:
+            return WeatherReducers.ReduceRedoAction(state, redoAction);
+        case JumpAction<UndoableWeatherState> jumpAction:
+            return WeatherReducers.ReduceJumpAction(state, jumpAction);
+        case UndoAllAction<UndoableWeatherState> undoAllAction:
+            return WeatherReducers.ReduceUndoAllAction(state, undoAllAction);
+        case RedoAllAction<UndoableWeatherState> redoAllAction:
+            return WeatherReducers.ReduceRedoAllAction(state, redoAllAction);
+        default:
+            throw new ArgumentException("Invalid action type", nameof(action));
+    }
+}
+```
+
+### Test the LoadForecast action which is the heavier
+
+Reproduce the LoadForecasts action by implementing as ExtensionMethod of the Feature so we can directly call it from the state as seen above for the counter, the data are retrieved from:
+
+[](https://api.jsonbin.io/v3/b/65f31dfe1f5677401f3d79f1)
+
+This because our sample data are stored in Blazor WebAssembly and they are not directly accessible from the tests, moreover in this way I simulate a real interaction with a *fake API.*
+
+To implement this I extended the state to work in way similar to the `EffectMethods` defined in the `WeatherEffects.cs` in the following way:
+
+```csharp
+// since now the json file is not in the project, we will use the jsonbin.io to retrieve the data
+// the data are stored in a json file that is publicly available and start with **record** that contains the array
+// so we need those classes to retrieve correctly the "dataset"
+public class WeatherData
+{
+    public WeatherForecast[] Record { get; set; }
+    public Metadata Metadata { get; set; }
+}
+
+public class Metadata
+{
+    public string Id { get; set; }
+    public bool Private { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+public static async Task LoadForecasts(this UndoableWeatherState state)
+{
+    HttpClient httpClient = new HttpClient();
+    var response = await httpClient.GetFromJsonAsync<WeatherData>("https://api.jsonbin.io/v3/b/65f31dfe1f5677401f3d79f1");
+    var forecasts_var = response?.Record; // Extract the forecasts from the JSON data
+    if (forecasts_var != null)
+    {
+        var randomForecasts = GetRandomForecasts(forecasts_var); // Get a randomly set of forecasts
+        forecasts = randomForecasts; 
+    }
+}
+
+// return a state with the randomForecasts as the new forecasts
+public static UndoableWeatherState WithNewForecasts(this UndoableWeatherState state)
+{
+    Task.Run(async () =>
+    {
+        await LoadForecasts(state);
+        state = state.WithWeather(new WeatherSetForecastsAction(forecasts));
+    }).Wait();
+
+    return state;
+}
+
+private static WeatherForecast[] GetRandomForecasts(WeatherForecast[] forecasts)
+{
+    var random = new Random();
+    var randomForecasts = forecasts.OrderBy(x => random.Next()).ToArray();
+    return randomForecasts;
+}
+```
+
+So in this way you should be able to correctly test the WeatherForecast loading:
+
+```csharp
+// inside another Test method ...
+
+var action2 = new WeatherLoadForecastsAction();
+state = state.WithWeather(action2);
+
+// so the forecasts should be not empty
+state.Present.Forecasts.Should().NotBeEmpty(); //!!!
+var forecasts = state.Present.Forecasts;
+
+var action3 = new WeatherSetLoadingAction(false);
+state = state.WithWeather(action3);
+
+var action4 = new WeatherSetInitializedAction();
+state = state.WithWeather(action4);
+
+// the following method to check if the state is updated is the simplest one
+// we can also check the state of the forecasts, but this is enough for now.
+// This, since the forecasts randomly changes.
+state.Should().NotBeEquivalentTo(
+   new UndoableWeatherState
+   {
+       Present = new WeatherState()
+       {
+           Initialized = false,
+           Loading = false,
+           Forecasts = Array.Empty<WeatherForecast>()
+       }
+   });
+// then check if the state is not loading anymore since it is initialized
+state.Present.Initialized.Should().BeTrue();
+state.Present.Loading.Should().BeFalse();
+
+// now we can go back undoing actions
+var action5 = new UndoAction<UndoableWeatherState>();
+state = state.WithWeather(action5);
+
+state.Should().BeEquivalentTo(
+   new UndoableWeatherState
+   {
+       Past = new[]
+       {
+              new WeatherState()
+              {
+                Initialized = false,
+                Loading = false,
+                Forecasts = Array.Empty<WeatherForecast>()
+              },
+              new WeatherState()
+              {
+                    Initialized = false,
+                    Loading = true,
+                    Forecasts = Array.Empty<WeatherForecast>()
+              },
+              new WeatherState()
+              {
+                   Initialized = false,
+                   Loading = true,
+                   Forecasts = forecasts.ToArray()
+              },
+       },
+       Present = new WeatherState()
+       {
+           Initialized = false,
+           Loading = false,
+           Forecasts = forecasts.ToArray()
+       },
+       Future = new[]
+       {
+            new WeatherState()
+            {
+               Initialized = true,
+               Loading = false,
+               Forecasts = forecasts.ToArray()
+            }
+       }
+   });
+   
+// continue your test method...
+```
+
+# Final Conclusion
+
+Succesfully tested both `Counter` and `Weather` usages and understand if the logic of the application works fine (if `Reducers` perform well).
+
+***Performed also Combined tests to demostrate that the actions on different states are independent.***
