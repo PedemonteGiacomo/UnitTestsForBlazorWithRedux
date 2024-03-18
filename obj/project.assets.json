@@ -7198,7 +7198,7 @@
       "projectName": "UnitTestsForBlazorWithRedux",
       "projectPath": "C:\\Users\\giacomo.pedemonte\\Source\\Repos\\PedemonteGiacomo\\UnitTestsForBlazorWithRedux\\UnitTestsForBlazorWithRedux.csproj",
       "packagesPath": "C:\\Users\\giacomo.pedemonte\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\giacomo.pedemonte\\Source\\Repos\\PedemonteGiacomo\\UnitTestsForBlazorWithRedux\\obj\\",
+      "outputPath": "C:\\Users\\giacomo.pedemonte\\source\\repos\\PedemonteGiacomo\\UnitTestsForBlazorWithRedux\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
