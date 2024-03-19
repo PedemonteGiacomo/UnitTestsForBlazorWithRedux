@@ -433,7 +433,7 @@ public static UndoableWeatherState WithWeather(this UndoableWeatherState state, 
 
 Reproduce the LoadForecasts action by implementing as ExtensionMethod of the Feature so we can directly call it from the state as seen above for the counter, the data are retrieved from:
 
-[](https://api.jsonbin.io/v3/b/65f31dfe1f5677401f3d79f1)
+[api.json.io](https://api.jsonbin.io/v3/b/65f31dfe1f5677401f3d79f1)
 
 This because our sample data are stored in Blazor WebAssembly and they are not directly accessible from the tests, moreover in this way I simulate a real interaction with a *fake API.*
 
